@@ -1,0 +1,1 @@
+# mercari-extension-vite
