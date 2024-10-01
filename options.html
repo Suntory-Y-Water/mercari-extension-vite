@@ -1,0 +1,162 @@
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>商品一覧</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #1e1e1e;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 760px; /* 720pxのコンテンツ幅 + 両側の20pxパディング */
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      .fixed-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: #1e1e1e;
+        z-index: 1000;
+        max-width: 760px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .content {
+        padding-top: 150px; /* 固定ヘッダーの高さに合わせて調整 */
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .item-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 15px;
+      }
+
+      .item-row {
+        background-color: #333333;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .item-row td {
+        padding: 0;
+      }
+
+      .item-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+
+      .item-info {
+        padding: 10px;
+      }
+
+      .item-title {
+        font-size: 16px;
+        padding-left: 8px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .item-title:hover {
+        text-decoration: underline;
+        text-underline-offset: 4px;
+      }
+
+      .checkbox-cell {
+        width: 30px;
+        text-align: center;
+        vertical-align: middle;
+        padding-right: 10px;
+        border-radius: 0 8px 8px 0;
+      }
+
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+      }
+
+      button {
+        background-color: #00af4f;
+        border: none;
+        color: #fff;
+        text-align: center;
+        display: inline-block;
+        font-size: 16px;
+        padding: 10px 24px;
+        border-radius: 0.375rem;
+        position: relative;
+        transition: background-color 0.4s, transform 0.4s;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      button:hover {
+        background-color: #007f3b;
+        color: white;
+      }
+
+      button:active {
+        border-bottom: none;
+      }
+
+      .back-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background-color: #00af4f;
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.4s;
+        width: auto;
+        height: auto;
+      }
+
+      .back-to-top:hover {
+        background-color: #007f3b;
+        color: white;
+      }
+
+      .back-to-top:active {
+        border-bottom: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <main>
+        <div class="fixed-header">
+          <h1>商品一覧</h1>
+          <button id="item-relisting" class="item-relisting" type="submit">
+            再出品する
+          </button>
+        </div>
+        <div class="content">
+          <table class="item-table" id="item-table"></table>
+        </div>
+        <button id="back-to-top" class="back-to-top">↑</button>
+      </main>
+    </div>
+    <script type="module" src="src/options.ts"></script>
+  </body>
+</html>
