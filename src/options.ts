@@ -51,22 +51,21 @@ function renderItems(items: Item[]) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  logger.log("options.tsが読み込まれました");
-  logger.log("初期処理を開始します");
+  logger.log("options", "初期処理を開始します");
   const result = await sendBackgroundMessage({ action: "OPTIONS_PAGE_LOADED" });
   if (!result) {
     throw new Error("バックグラウンドへのメッセージ送信に失敗しました");
   }
-  logger.log("chrome.storageから商品リストの取得を開始します");
+  logger.log("options", "chrome.storageから商品リストの取得を開始します");
   const itemList = await getChromeStorage<Item[]>("itemList");
 
   if (!itemList) {
     logger.error("商品リストが取得できませんでした。");
     return;
   }
-  logger.log("chrome.storageから商品リストの取得を終了します");
+  logger.log("options", "chrome.storageから商品リストの取得を終了します");
   renderItems(itemList);
-  logger.log("初期処理を終了します");
+  logger.log("options", "初期処理を終了します");
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -76,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   button.addEventListener("click", async () => {
-    logger.log("再出品する押下時の処理を開始します");
+    logger.log("options", "再出品する押下時の処理を開始します");
     const selectedInputs = document.querySelectorAll(
       'input[type="checkbox"]:checked'
     );
@@ -94,12 +93,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     );
     // 再出品対象商品をchrome.storageに保存する
-    logger.log("再出品対象商品をchrome.storageに保存するを開始します");
+    logger.log(
+      "options",
+      "再出品対象商品をchrome.storageに保存するを開始します"
+    );
     const result = await setChromeStorage("selectedItems", selectedItems);
     if (!result) {
       throw new Error("再出品対象商品の保存に失敗しました");
     }
-    logger.log("再出品対象商品をchrome.storageに保存するを終了します");
+    logger.log(
+      "options",
+      "再出品対象商品をchrome.storageに保存するを終了します"
+    );
 
     // 再出品処理を開始するメッセージをバックグラウンドに送信する
     const response = await sendBackgroundMessage({
@@ -108,6 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!response) {
       throw new Error("バックグラウンドへのメッセージ送信に失敗しました");
     }
-    logger.log("再出品する押下時の処理を終了します");
+    logger.log("options", "再出品する押下時の処理を終了します");
   });
 });

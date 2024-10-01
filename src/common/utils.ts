@@ -4,6 +4,7 @@ import type { MessageActionsId, MessageResponse } from "../types";
 async function tabsSendMessage(tabId: number, message: MessageActionsId) {
   try {
     logger.log(
+      "tabsSendMessage",
       `tabにメッセージを送信します。 tabId: ${tabId}, message:`,
       message
     );
@@ -20,7 +21,11 @@ async function runtimeSendMessage(
   message: MessageActionsId
 ): Promise<MessageResponse> {
   try {
-    logger.log("runtimeメッセージを送信します。 message:", message);
+    logger.log(
+      "runtimeSendMessage",
+      "runtimeメッセージを送信します。 message:",
+      message
+    );
     await chrome.runtime.sendMessage(message);
     return { success: true };
   } catch (error) {
@@ -55,7 +60,7 @@ export async function getActiveTab(): Promise<number | undefined> {
       if (tabs.length === 0 || tabs[0].id === undefined) {
         reject(new Error("タブが見つかりません。"));
       } else {
-        logger.log(`タブが見つかりました ID: ${tabs[0].id}`);
+        logger.log("getActiveTab", `タブが見つかりました ID: ${tabs[0].id}`);
         resolve(tabs[0].id);
       }
     });
@@ -70,7 +75,10 @@ export async function getSearchTab(
       if (tabs.length === 0 || tabs[0].id === undefined) {
         reject(new Error(`指定したページURLはありません : ${searchUrl}`));
       } else {
-        logger.log(`指定したURLのタブが見つかりました : ${tabs[0].id}`);
+        logger.log(
+          "getSearchTab",
+          `指定したURLのタブが見つかりました : ${tabs[0].id}`
+        );
         resolve(tabs[0].id);
       }
     });
@@ -89,5 +97,22 @@ export async function waitForTabClose(tabId: number): Promise<void> {
       }
     };
     chrome.tabs.onRemoved.addListener(listener);
+  });
+}
+
+/**
+ * @description 新しいタブが開かれるのを待機する
+ */
+export async function waitForNewTab(
+  openerTabId: number
+): Promise<chrome.tabs.Tab | null> {
+  return new Promise((resolve) => {
+    const createdListener = (tab: chrome.tabs.Tab) => {
+      if (tab.openerTabId === openerTabId) {
+        chrome.tabs.onCreated.removeListener(createdListener);
+        resolve(tab);
+      }
+    };
+    chrome.tabs.onCreated.addListener(createdListener);
   });
 }

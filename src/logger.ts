@@ -5,30 +5,47 @@ enum LogLevel {
 
 export class LoggingService {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  log(...messages: any[]): void {
-    this.printLog(LogLevel.INFO, this.stringifyMessages(messages));
+  log(functionName: string, ...messages: any[]): void {
+    this.printLog(
+      LogLevel.INFO,
+      functionName,
+      this.stringifyMessages(messages)
+    );
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  error(...messages: any[]): void {
-    this.printLog(LogLevel.ERROR, this.stringifyMessages(messages));
+  error(functionName: string, ...messages: any[]): void {
+    this.printLog(
+      LogLevel.ERROR,
+      functionName,
+      this.stringifyMessages(messages)
+    );
   }
 
-  private printLog(level: LogLevel, message: string): void {
+  private printLog(
+    level: LogLevel,
+    functionName: string,
+    message: string
+  ): void {
     const timestamp = new Date().toLocaleString("ja-JP", {
       timeZone: "Asia/Tokyo",
     });
-    const formattedMessage = this.formatLog(level, timestamp, message);
+    const formattedMessage = this.formatLog(
+      level,
+      timestamp,
+      functionName,
+      message
+    );
     console.log(formattedMessage);
   }
 
   private formatLog(
     level: LogLevel,
     timestamp: string,
-
+    functionName: string,
     message: string
   ): string {
-    return `${timestamp} ${level} ${message}`;
+    return `${timestamp}, ${level}, ${functionName}, ${message}`;
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>

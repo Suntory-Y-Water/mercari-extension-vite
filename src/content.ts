@@ -1,12 +1,7 @@
-import { getChromeStorage, setChromeStorage } from "./common/storage";
+import { setChromeStorage } from "./common/storage";
 import { Constants } from "./constants";
 import { logger } from "./logger";
-import type {
-  ReListingItem,
-  Item,
-  MessageActionsId,
-  MessageResponse,
-} from "./types";
+import type { Item, MessageActionsId, MessageResponse } from "./types";
 
 /**
  * @description リストに表示されている商品のIDを取得する
@@ -97,7 +92,6 @@ export function getAllItemsFromListings(
   baseSelector: string,
   itemSelector: string
 ): Item[] {
-  logger.log("getAllItemsFromListingsの処理を開始します。");
   const itemList: Item[] = [];
   let count = 1;
   let element: Element | null;
@@ -117,13 +111,18 @@ export function getAllItemsFromListings(
         break;
       }
     } catch (error) {
-      logger.error("商品の取得中にエラーが発生しました");
-      logger.error(`エラー内容 : ${(error as Error).message}`);
+      logger.error(
+        "getAllItemsFromListings",
+        "商品の取得中にエラーが発生しました"
+      );
+      logger.error(
+        "getAllItemsFromListings",
+        `エラー内容 : ${(error as Error).message}`
+      );
       break;
     }
   }
 
-  logger.log("getAllItemsFromListingsの処理を終了します");
   return itemList;
 }
 
@@ -134,47 +133,21 @@ chrome.runtime.onMessage.addListener(
     sendResponse: (response?: MessageResponse) => void
   ) => {
     if (request.action === "OPTIONS_PAGE_LOADED") {
-      logger.log("商品情報の取得を開始します");
+      logger.log("content_script", "商品情報の取得を開始します");
       const items = getAllItemsFromListings(
         "#currentListing > div",
         "div.content__884ec505"
       );
-      logger.log("商品情報の取得を終了します");
+      logger.log("content_script", "商品情報の取得を終了します");
       // 取得した情報をchrome.storageに保存する
-      logger.log("商品情報の保存を開始します");
+      logger.log("content_script", "商品情報の保存を開始します");
       const result = await setChromeStorage("itemList", items);
 
       if (!result) {
         throw new Error("商品情報の保存に失敗しました");
       }
-      logger.log("商品情報の保存を終了します");
+      logger.log("content_script", "商品情報の保存を終了します");
 
-      sendResponse({ success: true });
-    }
-
-    if (request.action === "RELISTING_START") {
-      logger.log("再出品処理を開始します");
-      // chrome.storageから再出品対象商品を取得する
-      logger.log("再出品対象商品をchrome.storageに取得するを開始します");
-      const result = await getChromeStorage<ReListingItem[]>("selectedItems");
-      if (!result) {
-        throw new Error("再出品対象商品の取得に失敗しました");
-      }
-      logger.log("再出品対象商品をchrome.storageに取得するを終了します");
-
-      // 再出品処理を開始する
-      for (const item of result) {
-        const cloneItemButton = document.querySelector<HTMLElement>(
-          item.cloneItemSelector
-        );
-        if (!cloneItemButton) {
-          throw new Error("再出品ボタンが見つかりませんでした");
-        }
-        cloneItemButton.click();
-        // TODO: タブが削除されたときの後続処理
-      }
-
-      logger.log("再出品処理を終了します");
       sendResponse({ success: true });
     }
     return true;
