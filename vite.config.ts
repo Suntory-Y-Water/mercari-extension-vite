@@ -17,9 +17,9 @@ const viteManifestHackIssue846: PluginOption & {
 
 const manifest = defineManifest({
   manifest_version: 3,
-  name: "メルカリで使用する拡張機能",
+  name: "フリマアシストぷらす",
   version: "1.0.0",
-  description: "フリマアシストの仕様をサポートする拡張機能",
+  description: "フリマアシストを使って自動再出品をする拡張機能",
   permissions: ["tabs", "activeTab", "scripting", "storage"],
   host_permissions: ["https://jp.mercari.com/*"],
   background: {
@@ -37,13 +37,6 @@ const manifest = defineManifest({
   options_page: "options.html",
   icons: {
     128: "box.png",
-  },
-  commands: {
-    _execute_action: {
-      suggested_key: {
-        default: "Ctrl+Shift+Y",
-      },
-    },
   },
 });
 

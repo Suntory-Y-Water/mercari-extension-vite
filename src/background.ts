@@ -141,6 +141,9 @@ chrome.runtime.onMessage.addListener(
       }
 
       logger.log("background", "再出品処理を終了します");
+      // content_scriptに再出品処理が完了したことを通知する
+      await sendContentScriptMessage(tabId, { action: "RELISTING_COMPLETE" });
+
       sendResponse({ success: true });
       return true;
     }

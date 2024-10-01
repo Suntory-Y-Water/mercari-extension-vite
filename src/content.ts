@@ -141,6 +141,13 @@ chrome.runtime.onMessage.addListener(
       logger.log("content_script", "商品情報の保存を終了します");
 
       sendResponse({ success: true });
+      return true;
+    }
+
+    if (request.action === "RELISTING_COMPLETE") {
+      window.alert("再出品処理が完了しました。");
+      sendResponse({ success: true });
+      return true;
     }
     return true;
   }

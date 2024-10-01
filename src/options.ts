@@ -28,7 +28,7 @@ function renderItems(items: Item[]) {
     infoCell.classList.add("item-info");
 
     // チェックボックスのIDを作成
-    const checkboxId = `checkbox-${item.id}`;
+    const checkboxId = item.id;
 
     // ラベル (label) 要素の作成
     const titleElement = document.createElement("label");
