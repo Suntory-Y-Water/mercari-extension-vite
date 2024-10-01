@@ -67,22 +67,14 @@ function notShowItemCheck(element: Element, selector: string): boolean {
  */
 function getListingsItem(element: Element, cloneItemSelector: string): Item {
   return {
-    id: getId(
-      getHref(element, Constants.SELECTOR_CONSTANTS.LISTINGS_CONSTANTS.HREF)
-    ),
+    id: getId(getHref(element, Constants.SELECTOR.LISTINGS.HREF)),
     name: getRelistItemName(
-      getTextContent(
-        element,
-        Constants.SELECTOR_CONSTANTS.LISTINGS_CONSTANTS.NAME
-      )
+      getTextContent(element, Constants.SELECTOR.LISTINGS.NAME)
     ),
-    thumbnail: getThumbnail(
-      element,
-      Constants.SELECTOR_CONSTANTS.LISTINGS_CONSTANTS.THUMBNAIL
-    ),
+    thumbnail: getThumbnail(element, Constants.SELECTOR.LISTINGS.THUMBNAIL),
     notShowItme: notShowItemCheck(
       element,
-      Constants.SELECTOR_CONSTANTS.LISTINGS_CONSTANTS.NOT_SHOW_ITEM
+      Constants.SELECTOR.LISTINGS.NOT_SHOW_ITEM
     ),
     cloneItemSelector: cloneItemSelector,
   };
@@ -149,6 +141,13 @@ chrome.runtime.onMessage.addListener(
       logger.log("content_script", "商品情報の保存を終了します");
 
       sendResponse({ success: true });
+      return true;
+    }
+
+    if (request.action === "RELISTING_COMPLETE") {
+      window.alert("再出品処理が完了しました。");
+      sendResponse({ success: true });
+      return true;
     }
     return true;
   }

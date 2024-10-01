@@ -1,0 +1,56 @@
+name: Create Release Note
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  build-and-release:
+    permissions:
+      contents: write
+      pull-requests: write
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: build dependencies
+        run: pnpm build
+
+      # ZIPファイルを作成する（distディレクトリを対象）
+      - name: Archive Release
+        uses: thedoctor0/zip-release@main
+        with:
+          type: "zip"
+          filename: extensions.zip
+          # distディレクトリにZIPファイルを作成
+          directory: dist
+
+      # リリースを作成し、生成されたZIPファイルをアップロードする
+      - name: Create Release and Upload Assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event.pull_request.title }}
+        uses: softprops/action-gh-release@v2
+        with:
+          # dist内のZIPファイルを指定
+          files: dist/extensions.zip
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: Release ${{ env.RELEASE_TAG }}
+          draft: false
+          prerelease: false

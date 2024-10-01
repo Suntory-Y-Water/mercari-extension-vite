@@ -26,9 +26,15 @@ function renderItems(items: Item[]) {
     // アイテム情報を含むセル (td) の作成
     const infoCell = document.createElement("td");
     infoCell.classList.add("item-info");
-    const titleElement = document.createElement("p");
+
+    // チェックボックスのIDを作成
+    const checkboxId = item.id;
+
+    // ラベル (label) 要素の作成
+    const titleElement = document.createElement("label");
     titleElement.classList.add("item-title");
     titleElement.textContent = item.name;
+    titleElement.htmlFor = checkboxId; // チェックボックスと関連付け
     infoCell.appendChild(titleElement);
     itemRow.appendChild(infoCell);
 
@@ -37,9 +43,7 @@ function renderItems(items: Item[]) {
     checkboxCell.classList.add("checkbox-cell");
     const checkboxElement = document.createElement("input");
     checkboxElement.type = "checkbox";
-
-    // 商品IDを設定
-    checkboxElement.id = item.id;
+    checkboxElement.id = checkboxId; // IDを設定
     checkboxElement.dataset.cloneItemSelector = item.cloneItemSelector;
     checkboxElement.tabIndex = 0;
     checkboxCell.appendChild(checkboxElement);
@@ -76,6 +80,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   button.addEventListener("click", async () => {
     logger.log("options", "再出品する押下時の処理を開始します");
+
+    // confilmメッセージを表示する
+    const startCheck = window.confirm("再出品を開始しますか？");
+    if (!startCheck) {
+      return;
+    }
+
     const selectedInputs = document.querySelectorAll(
       'input[type="checkbox"]:checked'
     );
@@ -92,6 +103,12 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       }
     );
+
+    if (selectedItems.length === 0) {
+      alert("再出品対象商品を選択してください");
+      return;
+    }
+
     // 再出品対象商品をchrome.storageに保存する
     logger.log(
       "options",
@@ -114,5 +131,19 @@ document.addEventListener("DOMContentLoaded", () => {
       throw new Error("バックグラウンドへのメッセージ送信に失敗しました");
     }
     logger.log("options", "再出品する押下時の処理を終了します");
+  });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const button = document.getElementById("back-to-top");
+  if (!button) {
+    throw new Error("上に戻るボタンが見つかりませんでした");
+  }
+
+  button.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   });
 });
