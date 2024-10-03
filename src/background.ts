@@ -128,9 +128,6 @@ chrome.runtime.onMessage.addListener(
         await new Promise((resolve) => setTimeout(resolve, 5000));
         await chrome.tabs.remove(deleteTab.id);
 
-        // 新しいタブが閉じられるのを待つ
-        await waitForTabClose(deleteTab.id);
-
         logger.log("background", "商品の削除を終了します。");
 
         // 最後の商品じゃない場合は、1秒待ってから次の商品を出品する
