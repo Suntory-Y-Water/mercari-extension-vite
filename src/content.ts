@@ -1,13 +1,13 @@
-import { setChromeStorage } from "./common/storage";
-import { Constants } from "./constants";
-import { logger } from "./logger";
-import type { Item, MessageActionsId, MessageResponse } from "./types";
+import { setChromeStorage } from './common/storage';
+import { Constants } from './constants';
+import { logger } from './logger';
+import type { Item, MessageActionsId, MessageResponse } from './types';
 
 /**
  * @description リストに表示されている商品のIDを取得する
  */
 function getId(href: string): string {
-  return href.split("/").pop() || "";
+  return href.split('/').pop() || '';
 }
 
 /**
@@ -16,16 +16,16 @@ function getId(href: string): string {
 function getHref(element: Element, selector: string): string {
   const targetElement = element.querySelector(selector);
   if (!targetElement) {
-    return "";
+    return '';
   }
-  return targetElement.getAttribute("href") || "";
+  return targetElement.getAttribute('href') || '';
 }
 
 /**
  * @description 商品名から不要な文字列を削除する
  */
 function getRelistItemName(name: string): string {
-  return name.trim().replace(/\s+/g, "");
+  return name.trim().replace(/\s+/g, '');
 }
 
 /**
@@ -34,9 +34,9 @@ function getRelistItemName(name: string): string {
 function getTextContent(element: Element, selector: string): string {
   const targetElement = element.querySelector(selector);
   if (!targetElement) {
-    return "";
+    return '';
   }
-  return targetElement.textContent || "";
+  return targetElement.textContent || '';
 }
 
 /**
@@ -45,10 +45,10 @@ function getTextContent(element: Element, selector: string): string {
 function getThumbnail(element: Element, selector: string): string {
   const targetElement = element.querySelector(selector);
   if (!targetElement) {
-    return "./box.png";
+    return './box.png';
   }
-  const thumbnail = targetElement.querySelector("img")?.getAttribute("src");
-  return thumbnail ? thumbnail : "./box.png";
+  const thumbnail = targetElement.querySelector('img')?.getAttribute('src');
+  return thumbnail ? thumbnail : './box.png';
 }
 
 /**
@@ -68,30 +68,21 @@ function notShowItemCheck(element: Element, selector: string): boolean {
 function getListingsItem(element: Element, cloneItemSelector: string): Item {
   return {
     id: getId(getHref(element, Constants.SELECTOR.LISTINGS.HREF)),
-    name: getRelistItemName(
-      getTextContent(element, Constants.SELECTOR.LISTINGS.NAME)
-    ),
+    name: getRelistItemName(getTextContent(element, Constants.SELECTOR.LISTINGS.NAME)),
     thumbnail: getThumbnail(element, Constants.SELECTOR.LISTINGS.THUMBNAIL),
-    notShowItme: notShowItemCheck(
-      element,
-      Constants.SELECTOR.LISTINGS.NOT_SHOW_ITEM
-    ),
+    time: getTextContent(element, Constants.SELECTOR.LISTINGS.TIME),
+    notShowItme: notShowItemCheck(element, Constants.SELECTOR.LISTINGS.NOT_SHOW_ITEM),
     cloneItemSelector: cloneItemSelector,
   };
 }
 
-export function getAllItemsFromListings(
-  baseSelector: string,
-  itemSelector: string
-): Item[] {
+export function getAllItemsFromListings(baseSelector: string, itemSelector: string): Item[] {
   const itemList: Item[] = [];
   let count = 1;
   let element: Element | null;
   while (
     // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-    (element = document.querySelector(
-      `${baseSelector} > div:nth-child(${count}) > ${itemSelector}`
-    )) !== null
+    (element = document.querySelector(`${baseSelector} > div:nth-child(${count}) > ${itemSelector}`)) !== null
   ) {
     try {
       if (element) {
@@ -103,14 +94,8 @@ export function getAllItemsFromListings(
         break;
       }
     } catch (error) {
-      logger.error(
-        "getAllItemsFromListings",
-        "商品の取得中にエラーが発生しました"
-      );
-      logger.error(
-        "getAllItemsFromListings",
-        `エラー内容 : ${(error as Error).message}`
-      );
+      logger.error('getAllItemsFromListings', '商品の取得中にエラーが発生しました');
+      logger.error('getAllItemsFromListings', `エラー内容 : ${(error as Error).message}`);
       break;
     }
   }
@@ -119,36 +104,29 @@ export function getAllItemsFromListings(
 }
 
 chrome.runtime.onMessage.addListener(
-  async (
-    request: MessageActionsId,
-    _sender,
-    sendResponse: (response?: MessageResponse) => void
-  ) => {
-    if (request.action === "OPTIONS_PAGE_LOADED") {
-      logger.log("content_script", "商品情報の取得を開始します");
-      const items = getAllItemsFromListings(
-        "#currentListing > div",
-        "div.content__884ec505"
-      );
-      logger.log("content_script", "商品情報の取得を終了します");
+  async (request: MessageActionsId, _sender, sendResponse: (response?: MessageResponse) => void) => {
+    if (request.action === 'OPTIONS_PAGE_LOADED') {
+      logger.log('content_script', '商品情報の取得を開始します');
+      const items = getAllItemsFromListings('#currentListing > div', 'div.content__884ec505');
+      logger.log('content_script', '商品情報の取得を終了します');
       // 取得した情報をchrome.storageに保存する
-      logger.log("content_script", "商品情報の保存を開始します");
-      const result = await setChromeStorage("itemList", items);
+      logger.log('content_script', '商品情報の保存を開始します');
+      const result = await setChromeStorage('itemList', items);
 
       if (!result) {
-        throw new Error("商品情報の保存に失敗しました");
+        throw new Error('商品情報の保存に失敗しました');
       }
-      logger.log("content_script", "商品情報の保存を終了します");
+      logger.log('content_script', '商品情報の保存を終了します');
 
       sendResponse({ success: true });
       return true;
     }
 
-    if (request.action === "RELISTING_COMPLETE") {
-      window.alert("再出品処理が完了しました。");
+    if (request.action === 'RELISTING_COMPLETE') {
+      window.alert('再出品処理が完了しました。');
       sendResponse({ success: true });
       return true;
     }
     return true;
-  }
+  },
 );

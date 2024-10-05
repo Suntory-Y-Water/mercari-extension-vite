@@ -13,7 +13,7 @@
       }
 
       .container {
-        max-width: 760px; /* 720pxのコンテンツ幅 + 両側の20pxパディング */
+        max-width: 760px;
         margin: 0 auto;
         padding: 0 20px;
       }
@@ -28,11 +28,11 @@
         max-width: 760px;
         width: 100%;
         margin: 0 auto;
-        padding: 20px;
+        padding: 16px;
       }
 
       .content {
-        padding-top: 150px; /* 固定ヘッダーの高さに合わせて調整 */
+        padding-top: 150px;
       }
 
       h1 {
@@ -40,20 +40,19 @@
         margin-bottom: 20px;
       }
 
-      .item-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 15px;
+      .item-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
       }
 
       .item-row {
+        display: flex;
+        align-items: center;
         background-color: #333333;
         border-radius: 8px;
-        overflow: hidden;
-      }
-
-      .item-row td {
-        padding: 0;
+        padding: 10px;
+        margin-bottom: 15px;
       }
 
       .item-image {
@@ -61,17 +60,19 @@
         height: 80px;
         border-radius: 8px;
         object-fit: cover;
+        flex-shrink: 0;
       }
 
-      .item-info {
-        padding: 10px;
+      .item-details {
+        flex-grow: 1;
+        padding-left: 10px;
       }
 
       .item-title {
         font-size: 16px;
-        padding-left: 8px;
         font-weight: bold;
         cursor: pointer;
+        margin: 0;
       }
 
       .item-title:hover {
@@ -79,12 +80,16 @@
         text-underline-offset: 4px;
       }
 
+      .item-time {
+        font-size: 14px;
+        color: #ccc;
+        margin-top: 5px;
+      }
+
       .checkbox-cell {
         width: 30px;
         text-align: center;
-        vertical-align: middle;
-        padding-right: 10px;
-        border-radius: 0 8px 8px 0;
+        padding-left: 10px;
       }
 
       input[type="checkbox"] {
@@ -152,7 +157,7 @@
           </button>
         </div>
         <div class="content">
-          <table class="item-table" id="item-table"></table>
+          <div class="item-list" id="item-list"></div>
         </div>
         <button id="back-to-top" class="back-to-top">↑</button>
       </main>
