@@ -11,6 +11,10 @@ function renderItems(items: Item[]) {
   }
 
   for (const item of items) {
+    if (item.notShowItme) {
+      continue;
+    }
+
     // 行要素の作成
     const itemRow = document.createElement('li');
     itemRow.classList.add('item-row');
