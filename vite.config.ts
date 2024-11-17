@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 const manifest = defineManifest({
   manifest_version: 3,
   name: 'フリマアシストぷらす',
-  version: '1.0.0',
+  version: '1.0.1',
   description: 'フリマアシストを使って自動再出品をする拡張機能',
   permissions: ['tabs', 'activeTab', 'scripting', 'storage'],
   host_permissions: ['https://jp.mercari.com/*'],

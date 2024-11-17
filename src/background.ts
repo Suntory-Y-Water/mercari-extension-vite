@@ -92,7 +92,8 @@ chrome.runtime.onMessage.addListener(
         }
 
         // 新しく開いたタブを閉じる
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 7000));
+        logger.log('background', '削除した商品のタブを閉じます');
         await chrome.tabs.remove(deleteTab.id);
 
         logger.log('background', '商品の削除を終了します。');
