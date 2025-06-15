@@ -53,16 +53,13 @@ export function getAllItemsFromListings(): Item[] {
       }
     }
 
-    if (notShowItme) {
-      continue;
-    }
-
-    const cloneItemSelector = `#my-page-main-content > div > div > div > div > ul > li:nth-child(${i}) #clone-item`;
+    const cloneItemSelector = `#my-page-main-content > div > div > div > div > ul > li:nth-child(${i + 1}) #clone-item`;
 
     itemList.push({
       id,
       name,
       thumbnail,
+      notShowItme,
       cloneItemSelector,
     });
   }

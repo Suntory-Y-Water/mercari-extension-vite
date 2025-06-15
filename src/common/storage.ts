@@ -15,10 +15,7 @@ export async function getChromeStorage<T>(key: string): Promise<T | null> {
 /**
  * @description chrome.storageにデータを設定する
  */
-export async function setChromeStorage<T>(
-  key: string,
-  value: T
-): Promise<boolean> {
+export async function setChromeStorage<T>(key: string, value: T): Promise<boolean> {
   try {
     await chrome.storage.local.set({ [key]: value });
     if (chrome.runtime.lastError) {

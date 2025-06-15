@@ -1,13 +1,9 @@
-import { logger } from "../logger";
-import type { MessageActionsId, MessageResponse } from "../types";
+import { logger } from '../logger';
+import type { MessageActionsId, MessageResponse } from '../types';
 
 async function tabsSendMessage(tabId: number, message: MessageActionsId) {
   try {
-    logger.log(
-      "tabsSendMessage",
-      `tabにメッセージを送信します。 tabId: ${tabId}, message:`,
-      message
-    );
+    logger.log('tabsSendMessage', `tabにメッセージを送信します。 tabId: ${tabId}, message:`, message);
     await chrome.tabs.sendMessage(tabId, message);
   } catch (error) {
     if (error instanceof Error) {
@@ -17,15 +13,9 @@ async function tabsSendMessage(tabId: number, message: MessageActionsId) {
   }
 }
 
-async function runtimeSendMessage(
-  message: MessageActionsId
-): Promise<MessageResponse> {
+async function runtimeSendMessage(message: MessageActionsId): Promise<MessageResponse> {
   try {
-    logger.log(
-      "runtimeSendMessage",
-      "runtimeメッセージを送信します。 message:",
-      message
-    );
+    logger.log('runtimeSendMessage', 'runtimeメッセージを送信します。 message:', message);
     await chrome.runtime.sendMessage(message);
     return { success: true };
   } catch (error) {
@@ -37,18 +27,13 @@ async function runtimeSendMessage(
   }
 }
 
-export async function sendContentScriptMessage(
-  tabId: number,
-  message: MessageActionsId
-): Promise<void> {
+export async function sendContentScriptMessage(tabId: number, message: MessageActionsId): Promise<void> {
   return await tabsSendMessage(tabId, {
     action: message.action,
   });
 }
 
-export async function sendBackgroundMessage(
-  message: MessageActionsId
-): Promise<MessageResponse> {
+export async function sendBackgroundMessage(message: MessageActionsId): Promise<MessageResponse> {
   return await runtimeSendMessage({
     action: message.action,
   });
@@ -58,27 +43,22 @@ export async function getActiveTab(): Promise<number | undefined> {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length === 0 || tabs[0].id === undefined) {
-        reject(new Error("タブが見つかりません。"));
+        reject(new Error('タブが見つかりません。'));
       } else {
-        logger.log("getActiveTab", `タブが見つかりました ID: ${tabs[0].id}`);
+        logger.log('getActiveTab', `タブが見つかりました ID: ${tabs[0].id}`);
         resolve(tabs[0].id);
       }
     });
   });
 }
 
-export async function getSearchTab(
-  searchUrl: string
-): Promise<number | undefined> {
+export async function getSearchTab(searchUrl: string): Promise<number | undefined> {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ url: searchUrl }, (tabs) => {
       if (tabs.length === 0 || tabs[0].id === undefined) {
         reject(new Error(`指定したページURLはありません : ${searchUrl}`));
       } else {
-        logger.log(
-          "getSearchTab",
-          `指定したURLのタブが見つかりました : ${tabs[0].id}`
-        );
+        logger.log('getSearchTab', `指定したURLのタブが見つかりました : ${tabs[0].id}`);
         resolve(tabs[0].id);
       }
     });
@@ -103,9 +83,7 @@ export async function waitForTabClose(tabId: number): Promise<void> {
 /**
  * @description 新しいタブが開かれるのを待機する
  */
-export async function waitForNewTab(
-  openerTabId: number
-): Promise<chrome.tabs.Tab | null> {
+export async function waitForNewTab(openerTabId: number): Promise<chrome.tabs.Tab | null> {
   return new Promise((resolve) => {
     const createdListener = (tab: chrome.tabs.Tab) => {
       if (tab.openerTabId === openerTabId) {
