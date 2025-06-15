@@ -31,8 +31,8 @@ export function getAllItemsFromListings(): Item[] {
   const itemElements = document.querySelectorAll('#my-page-main-content > div > div > div > div > ul > li > a');
 
   // 各商品の商品情報を取得
-  for (let index = 0; index < itemElements.length; index++) {
-    const itemElement = itemElements[index];
+  for (let i = 0; i < itemElements.length; i++) {
+    const itemElement = itemElements[i];
     // 商品IDを取得（親のa要素のhrefから抽出）
     const href = itemElement.getAttribute('href') || '';
     const id = href.split('/').pop() || '';
@@ -53,18 +53,16 @@ export function getAllItemsFromListings(): Item[] {
       }
     }
 
-    const cloneItemSelector = `#my-page-main-content > div > div > div > div > ul > li:nth-child(${index + 1}) #clone-item`;
+    if (notShowItme) {
+      continue;
+    }
 
-    logger.log(
-      'getAllItemsFromListings',
-      `id: ${id}, name: ${name}, thumbnail: ${thumbnail}, notShowItme: ${notShowItme}, cloneItemSelector: ${cloneItemSelector}`,
-    );
+    const cloneItemSelector = `#my-page-main-content > div > div > div > div > ul > li:nth-child(${i}) #clone-item`;
 
     itemList.push({
       id,
       name,
       thumbnail,
-      notShowItme,
       cloneItemSelector,
     });
   }

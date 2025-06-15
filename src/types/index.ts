@@ -1,5 +1,5 @@
 export type MessageActionsId = {
-  action: "OPTIONS_PAGE_LOADED" | "RELISTING_START" | "RELISTING_COMPLETE";
+  action: 'OPTIONS_PAGE_LOADED' | 'RELISTING_START' | 'RELISTING_COMPLETE';
 };
 
 export type MessageResponse = {
@@ -13,7 +13,6 @@ export type Item = {
   id: string;
   name: string;
   thumbnail: string;
-  notShowItme: boolean;
   cloneItemSelector: string;
 };
 
