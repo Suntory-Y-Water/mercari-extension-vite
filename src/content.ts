@@ -1,32 +1,6 @@
-import { setChromeStorage } from "./common/storage";
-import { Constants } from "./constants";
-import { logger } from "./logger";
-import type { Item, MessageActionsId, MessageResponse } from "./types";
-
-/**
- * @description リストに表示されている商品のIDを取得する
- */
-function getId(href: string): string {
-  return href.split("/").pop() || "";
-}
-
-/**
- * @description 指定したセレクタの要素からhref属性を取得する
- */
-function getHref(element: Element, selector: string): string {
-  const targetElement = element.querySelector(selector);
-  if (!targetElement) {
-    return "";
-  }
-  return targetElement.getAttribute("href") || "";
-}
-
-/**
- * @description 商品名から不要な文字列を削除する
- */
-function getRelistItemName(name: string): string {
-  return name.trim().replace(/\s+/g, "");
-}
+import { setChromeStorage } from './common/storage';
+import { logger } from './logger';
+import type { Item, MessageActionsId, MessageResponse } from './types';
 
 /**
  * @description 指定したセレクタの要素からテキストを取得する
@@ -34,9 +8,9 @@ function getRelistItemName(name: string): string {
 function getTextContent(element: Element, selector: string): string {
   const targetElement = element.querySelector(selector);
   if (!targetElement) {
-    return "";
+    return '';
   }
-  return targetElement.textContent || "";
+  return targetElement.textContent || '';
 }
 
 /**
@@ -45,110 +19,75 @@ function getTextContent(element: Element, selector: string): string {
 function getThumbnail(element: Element, selector: string): string {
   const targetElement = element.querySelector(selector);
   if (!targetElement) {
-    return "./box.png";
+    return './box.png';
   }
-  const thumbnail = targetElement.querySelector("img")?.getAttribute("src");
-  return thumbnail ? thumbnail : "./box.png";
+  const thumbnail = targetElement.getAttribute('src');
+  return thumbnail ? thumbnail : './box.png';
 }
 
-/**
- * @description 指定したセレクタの要素から商品の公開状態を取得する。公開停止中: true, 公開中: false
- */
-function notShowItemCheck(element: Element, selector: string): boolean {
-  const targetElement = element.querySelector(selector);
-  if (!targetElement) {
-    return false;
-  }
-  return true;
-}
-
-/**
- * @description リストに表示されている商品の情報を取得する
- */
-function getListingsItem(element: Element, cloneItemSelector: string): Item {
-  return {
-    id: getId(getHref(element, Constants.SELECTOR.LISTINGS.HREF)),
-    name: getRelistItemName(
-      getTextContent(element, Constants.SELECTOR.LISTINGS.NAME)
-    ),
-    thumbnail: getThumbnail(element, Constants.SELECTOR.LISTINGS.THUMBNAIL),
-    notShowItme: notShowItemCheck(
-      element,
-      Constants.SELECTOR.LISTINGS.NOT_SHOW_ITEM
-    ),
-    cloneItemSelector: cloneItemSelector,
-  };
-}
-
-export function getAllItemsFromListings(
-  baseSelector: string,
-  itemSelector: string
-): Item[] {
+export function getAllItemsFromListings(): Item[] {
   const itemList: Item[] = [];
-  let count = 1;
-  let element: Element | null;
-  while (
-    // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-    (element = document.querySelector(
-      `${baseSelector} > div:nth-child(${count}) > ${itemSelector}`
-    )) !== null
-  ) {
-    try {
-      if (element) {
-        const cloneItemSelector = `${baseSelector} > div:nth-child(${count}) > div.content__884ec505 > a > div > div > #clone-item`;
-        const productData = getListingsItem(element, cloneItemSelector);
-        itemList.push(productData);
-        count++;
-      } else {
+  // li要素を全て取得
+  const itemElements = document.querySelectorAll('#my-page-main-content > div > div > div > div > ul > li > a');
+
+  // 各商品の商品情報を取得
+  for (const itemElement of itemElements) {
+    // 商品IDを取得（親のa要素のhrefから抽出）
+    const href = itemElement.getAttribute('href') || '';
+    const id = href.split('/').pop() || '';
+
+    // 商品名を取得
+    const name = getTextContent(itemElement, 'p[data-testid="item-label"]');
+
+    // サムネイル画像を取得
+    const thumbnail = getThumbnail(itemElement, 'picture img');
+
+    // 公開停止中かどうかを判定
+    const statusElements = itemElement.querySelectorAll('span');
+    let notShowItme = false;
+    for (const statusElement of statusElements) {
+      if (statusElement.textContent?.includes('公開停止中')) {
+        notShowItme = true;
         break;
       }
-    } catch (error) {
-      logger.error(
-        "getAllItemsFromListings",
-        "商品の取得中にエラーが発生しました"
-      );
-      logger.error(
-        "getAllItemsFromListings",
-        `エラー内容 : ${(error as Error).message}`
-      );
-      break;
     }
-  }
+    const cloneItemSelector = '#clone-item';
 
+    itemList.push({
+      id,
+      name,
+      thumbnail,
+      notShowItme,
+      cloneItemSelector,
+    });
+  }
   return itemList;
 }
 
 chrome.runtime.onMessage.addListener(
-  async (
-    request: MessageActionsId,
-    _sender,
-    sendResponse: (response?: MessageResponse) => void
-  ) => {
-    if (request.action === "OPTIONS_PAGE_LOADED") {
-      logger.log("content_script", "商品情報の取得を開始します");
-      const items = getAllItemsFromListings(
-        "#currentListing > div",
-        "div.content__884ec505"
-      );
-      logger.log("content_script", "商品情報の取得を終了します");
+  async (request: MessageActionsId, _sender, sendResponse: (response?: MessageResponse) => void) => {
+    if (request.action === 'OPTIONS_PAGE_LOADED') {
+      logger.log('content_script', '商品情報の取得を開始します');
+      const items = getAllItemsFromListings();
+      logger.log('content_script', '商品情報の取得を終了します');
       // 取得した情報をchrome.storageに保存する
-      logger.log("content_script", "商品情報の保存を開始します");
-      const result = await setChromeStorage("itemList", items);
+      logger.log('content_script', '商品情報の保存を開始します');
+      const result = await setChromeStorage('itemList', items);
 
       if (!result) {
-        throw new Error("商品情報の保存に失敗しました");
+        throw new Error('商品情報の保存に失敗しました');
       }
-      logger.log("content_script", "商品情報の保存を終了します");
+      logger.log('content_script', '商品情報の保存を終了します');
 
       sendResponse({ success: true });
       return true;
     }
 
-    if (request.action === "RELISTING_COMPLETE") {
-      window.alert("再出品処理が完了しました。");
+    if (request.action === 'RELISTING_COMPLETE') {
+      window.alert('再出品処理が完了しました。');
       sendResponse({ success: true });
       return true;
     }
     return true;
-  }
+  },
 );
