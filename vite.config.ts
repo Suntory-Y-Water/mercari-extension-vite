@@ -1,19 +1,6 @@
-import { defineConfig, type PluginOption } from "vite";
+import { defineConfig } from "vite";
 import { crx, defineManifest } from "@crxjs/vite-plugin";
 
-const viteManifestHackIssue846: PluginOption & {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  renderCrxManifest: (manifest: any, bundle: any) => void;
-} = {
-  // Workaround from https://github.com/crxjs/chrome-extension-tools/issues/846#issuecomment-1861880919.
-  name: "manifestHackIssue846",
-  renderCrxManifest(_manifest, bundle) {
-    bundle["manifest.json"] = bundle[".vite/manifest.json"];
-    bundle["manifest.json"].fileName = "manifest.json";
-    // biome-ignore lint/performance/noDelete: <explanation>
-    delete bundle[".vite/manifest.json"];
-  },
-};
 
 const manifest = defineManifest({
   manifest_version: 3,
@@ -21,7 +8,10 @@ const manifest = defineManifest({
   version: "1.0.0",
   description: "フリマアシストを使って自動再出品をする拡張機能",
   permissions: ["tabs", "activeTab", "scripting", "storage"],
-  host_permissions: ["https://jp.mercari.com/*"],
+  host_permissions: [
+    "https://jp.mercari.com/*",
+    "http://localhost:5173/*" // 開発環境用
+  ],
   background: {
     service_worker: "src/background.ts",
   },
@@ -41,7 +31,7 @@ const manifest = defineManifest({
 });
 
 export default defineConfig({
-  plugins: [viteManifestHackIssue846, crx({ manifest })],
+  plugins: [crx({ manifest })],
   build: {
     outDir: "dist",
     emptyOutDir: true,
