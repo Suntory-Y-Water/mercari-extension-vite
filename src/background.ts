@@ -41,13 +41,18 @@ chrome.runtime.onMessage.addListener(
 
       // 再出品処理を開始する
       for (const item of result) {
+        logger.log('background', `商品の処理を開始: ${item.id} (${result.indexOf(item) + 1}/${result.length})`);
+
         // 各ループでタブをアクティブ化
         await chrome.tabs.update(tabId, { active: true });
+        logger.log('background', `タブをアクティブ化しました: ${tabId}`);
 
         // 新しいタブが開かれるのを待つリスナーを先に設定
         const newTabPromise = waitForNewTab(tabId);
+        logger.log('background', '新しいタブの監視を開始しました');
 
         // 再出品ボタンをクリックする
+        logger.log('background', `再出品ボタンをクリックします: ${item.cloneItemSelector}`);
         await chrome.scripting.executeScript({
           target: { tabId: tabId },
           func: (selector) => {
@@ -59,8 +64,10 @@ chrome.runtime.onMessage.addListener(
           },
           args: [item.cloneItemSelector],
         });
+        logger.log('background', '再出品ボタンのクリックが完了しました');
 
         // 新しいタブが開かれるのを待つ
+        logger.log('background', '新しいタブが開かれるのを待機中...');
         const newTab = await newTabPromise;
         if (!newTab) {
           throw new Error('新しいタブが開かれませんでした');
@@ -70,11 +77,14 @@ chrome.runtime.onMessage.addListener(
           throw new Error('新しいタブのIDが取得できませんでした');
         }
 
+        logger.log('background', `新しいタブ(${newTab.id})が閉じられるのを待機中...`);
         await waitForTabClose(newTab.id);
+        logger.log('background', `新しいタブ(${newTab.id})が閉じられました`);
 
         logger.log('background', '商品の削除を開始します。');
 
         // 新しいタブで削除対象ページのURLを開き、タブ情報を取得
+        logger.log('background', `削除用タブを作成します: https://jp.mercari.com/sell/edit/${item.id}?faaid=1`);
         const deleteTab = await chrome.tabs.create({
           url: `https://jp.mercari.com/sell/edit/${item.id}?faaid=1`,
           active: true,
@@ -92,19 +102,30 @@ chrome.runtime.onMessage.addListener(
         }
 
         // 新しく開いたタブを閉じる
+        logger.log('background', '5秒待機してから削除用タブを閉じます');
         await new Promise((resolve) => setTimeout(resolve, 5000));
-        await chrome.tabs.remove(deleteTab.id);
+        logger.log('background', `削除用タブ(${deleteTab.id})を閉じます`);
 
-        // 新しいタブが閉じられるのを待つ
-        await waitForTabClose(deleteTab.id);
+        try {
+          await chrome.tabs.remove(deleteTab.id);
+          logger.log('background', `削除用タブ(${deleteTab.id})を手動で閉じました`);
+        } catch (error) {
+          logger.log('background', `削除用タブ(${deleteTab.id})は既に閉じられています: ${error}`);
+        }
+
+        // 削除用タブは別の拡張機能で自動的に閉じられるため、待機処理は不要
+        logger.log('background', '削除用タブの処理が完了しました');
 
         logger.log('background', '商品の削除を終了します。');
 
         // 最後の商品じゃない場合は、1秒待ってから次の商品を出品する
         if (item !== result[result.length - 1]) {
+          logger.log('background', '1秒待ってから次の商品を処理します');
           await new Promise((resolve) => setTimeout(resolve, 1000));
-          logger.log('background', '1秒待ってから次の商品を出品します');
+          logger.log('background', '1秒の待機が完了しました');
         }
+
+        logger.log('background', `商品の処理を完了: ${item.id} (${result.indexOf(item) + 1}/${result.length})`);
       }
 
       logger.log('background', '再出品処理を終了します');
